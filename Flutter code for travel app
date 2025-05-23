@@ -1,0 +1,310 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(PickMeApp());
+}
+
+class PickMeApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'PICK ME',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        fontFamily: 'Georgia',
+        scaffoldBackgroundColor: Colors.blue[50],
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue[900],
+          foregroundColor: Colors.white,
+        ),
+      ),
+      home: LoginPage(),
+    );
+  }
+}
+
+class LoginPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'PICK ME',
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue[900]),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'WORK, TRAVEL, SAVE, REPEAT',
+              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.blueGrey),
+            ),
+            SizedBox(height: 32),
+            TextField(decoration: InputDecoration(labelText: 'Username')),
+            TextField(decoration: InputDecoration(labelText: 'Password'), obscureText: true),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileSetupPage())),
+              child: Text('Login'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProfileSetupPage extends StatelessWidget {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController contactController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Profile Setup')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            TextField(controller: nameController, decoration: InputDecoration(labelText: 'Full Name')),
+            TextField(controller: contactController, decoration: InputDecoration(labelText: 'Contact Number'), keyboardType: TextInputType.phone),
+            TextField(decoration: InputDecoration(labelText: 'Email'), keyboardType: TextInputType.emailAddress),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(labelText: 'Gender'),
+              items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem(value: gender, child: Text(gender))).toList(),
+              onChanged: (_) {},
+            ),
+            TextField(
+              decoration: InputDecoration(labelText: 'Date of Birth'),
+              keyboardType: TextInputType.datetime,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => HomePage(name: nameController.text, contact: contactController.text)),
+              ),
+              child: Text('Submit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  final String name;
+  final String contact;
+
+  HomePage({required this.name, required this.contact});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final List<String> transportModes = ['Flight', 'Train', 'Bus', 'Car'];
+  final List<String> countries = ['USA', 'Canada', 'France', 'India', 'Japan', 'Germany', 'Brazil', 'Australia', 'Italy', 'Thailand'];
+
+  final Map<String, List<String>> hotels = {
+    'USA': ['Hotel California', 'Grand NYC'],
+    'India': ['Taj Palace', 'Leela Ambience'],
+    'France': ['Hotel Paris', 'Eiffel Stay'],
+  };
+
+  final Map<String, List<String>> restaurants = {
+    'USA': ['Burger Joint', 'Pasta Place'],
+    'India': ['Saravana Bhavan', 'Barbeque Nation'],
+    'France': ['Le Gourmet', 'Bistro France'],
+  };
+
+  final List<String> insurancePlans = ['Basic Plan', 'Premium Plan', 'Platinum Plan'];
+
+  String? selectedCountry;
+  String? selectedTransport;
+  String? selectedHotel;
+  String? selectedRestaurant;
+  String? selectedInsurance;
+  DateTime? selectedDate;
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> availableHotels = selectedCountry != null ? hotels[selectedCountry!] ?? [] : [];
+    List<String> availableRestaurants = selectedCountry != null ? restaurants[selectedCountry!] ?? [] : [];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('PICK ME', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('WORK, TRAVEL, SAVE, REPEAT', style: TextStyle(fontSize: 12)),
+          ],
+        ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'Logout') {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return ['History', 'Visa & Documents', 'About', 'Logout'].map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(radius: 30, backgroundColor: Colors.blue, child: Icon(Icons.person, color: Colors.white)),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(widget.contact, style: TextStyle(fontSize: 14)),
+                  ],
+                )
+              ],
+            ),
+            SizedBox(height: 20),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(labelText: 'Select Transport Mode'),
+              items: transportModes.map((mode) => DropdownMenuItem(value: mode, child: Text(mode))).toList(),
+              onChanged: (value) => setState(() => selectedTransport = value),
+            ),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(labelText: 'Choose Destination'),
+              items: countries.map((country) => DropdownMenuItem(value: country, child: Text(country))).toList(),
+              onChanged: (value) => setState(() => selectedCountry = value),
+            ),
+            if (selectedCountry != null) ...[
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: 'Select Hotel'),
+                items: availableHotels.map((hotel) => DropdownMenuItem(value: hotel, child: Text(hotel))).toList(),
+                onChanged: (value) => setState(() => selectedHotel = value),
+              ),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: 'Select Restaurant'),
+                items: availableRestaurants.map((restaurant) => DropdownMenuItem(value: restaurant, child: Text(restaurant))).toList(),
+                onChanged: (value) => setState(() => selectedRestaurant = value),
+              ),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: 'Travel Insurance'),
+                items: insurancePlans.map((plan) => DropdownMenuItem(value: plan, child: Text(plan))).toList(),
+                onChanged: (value) => setState(() => selectedInsurance = value),
+              ),
+              ListTile(
+                title: Text(selectedDate == null ? 'Select Travel Date' : 'Travel Date: ${selectedDate!.toLocal()}'.split(' ')[0]),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2101),
+                  );
+                  if (picked != null) setState(() => selectedDate = picked);
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (selectedCountry != null && selectedTransport != null && selectedDate != null) {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => BookingPage(selectedCountry!)));
+                  }
+                },
+                child: Text('Book Ticket'),
+              ),
+              SizedBox(height: 20),
+              Text('Join our global travel community!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              ElevatedButton(
+                onPressed: () {},
+                child: Text('Explore Community'),
+              )
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BookingPage extends StatelessWidget {
+  final String selectedCountry;
+
+  BookingPage(this.selectedCountry);
+
+  @override
+  Widget build(BuildContext context) {
+    double price = 150.0;
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Booking Summary')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('Selected Country: $selectedCountry'),
+            Text('Total Price: \$${price.toStringAsFixed(2)}'),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PaymentPage(price))),
+              child: Text('Checkout'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PaymentPage extends StatelessWidget {
+  final double totalPrice;
+
+  PaymentPage(this.totalPrice);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Payment')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Text('Amount to Pay: \$${totalPrice.toStringAsFixed(2)}'),
+            TextField(decoration: InputDecoration(labelText: 'Card Number')),
+            TextField(decoration: InputDecoration(labelText: 'Expiry Date')),
+            TextField(decoration: InputDecoration(labelText: 'CVV')),
+            TextField(decoration: InputDecoration(labelText: 'UPI ID')),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: Text('Success'),
+                  content: Text('Payment Successful!'),
+                  actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
+                ),
+              ),
+              child: Text('Pay Now'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
